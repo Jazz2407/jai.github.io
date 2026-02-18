@@ -1,0 +1,3 @@
+ 'service_uerhkbd', 
+      'template_1yuqf3y', 
+      ("YOUWOQ5Y5rG8liS3z5fY"); // Replace with your actual Public Key
