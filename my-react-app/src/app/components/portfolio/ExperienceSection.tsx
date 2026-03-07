@@ -66,13 +66,13 @@ export function ExperienceSection() {
                         <div className="flex-1">
                           <h3 className="text-xl text-white mb-1">{exp.role}</h3>
                           <p className="text-blue-400">{exp.company}</p>
-                          <p className="text-sm text-slate-500 mt-1">{exp.duration}</p>
+                          <p className="text-sm text-slate-500 mt-1">{exp.period}</p>
                         </div>
                       </div>
 
                       {/* Highlights */}
                       <div className="relative z-10 space-y-3">
-                        {exp.highlights.map((highlight, idx) => (
+                        {exp.highlights.map((highlight: string, idx: number) => (
                           <div key={idx} className="flex items-start gap-3">
                             <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 mt-2 flex-shrink-0" />
                             <p className="text-sm text-slate-300 leading-relaxed">{highlight}</p>

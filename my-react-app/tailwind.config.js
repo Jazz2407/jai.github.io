@@ -1,5 +1,8 @@
 /** @type {import('tailwindcss').Config} */
+import tailwindAnimate from 'tailwindcss-animate';
+
 export default {
+  // Ensure this covers your nested 'app' directory
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,6 +11,6 @@ export default {
     extend: {},
   },
   plugins: [
-    require("tailwindcss-animate"), // Add the plugin here instead of CSS
+    tailwindAnimate, // Use the imported variable
   ],
 }

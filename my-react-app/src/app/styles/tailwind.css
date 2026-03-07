@@ -1,4 +1,7 @@
-@import 'tailwindcss' source(none);
-@source '../**/*.{js,ts,jsx,tsx}';
+/* If you are using Tailwind v3 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@import 'tw-animate-css';
+/* If you are using Tailwind v4 */
+@import "tailwindcss";

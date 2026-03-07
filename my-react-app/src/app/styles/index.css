@@ -1,8 +1,7 @@
-@import "tailwindcss";
+/* 1. Imports MUST come first */
+@import "./fonts.css"; 
 
-@import "./fonts.css";
-@import "./theme.css";
-
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui;
-}
+/* 2. Tailwind directives follow */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

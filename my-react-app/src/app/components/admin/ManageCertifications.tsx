@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
 import { usePortfolio, Certification } from '../../context/PortfolioContext';
-import { Plus, Edit2, Trash2, Award, ExternalLink, Calendar } from 'lucide-react';
+import { Plus, Edit2, Trash2, Award, Calendar } from 'lucide-react';
 import { Button } from '../ui/button';
 import { CertificationModal } from './CertificationModal';
 import { toast } from 'sonner';
@@ -92,17 +92,7 @@ export function ManageCertifications() {
                         <Award className="w-5 h-5 text-purple-400" />
                       </div>
                       <div className="flex gap-2">
-                        {cert.url && (
-                          <a
-                            href={cert.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-blue-400 hover:bg-blue-900/20 transition-colors"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        )}
+                        {/* URL logic removed as 'url' does not exist on Certification type */}
                         <button
                           onClick={() => handleEdit(cert)}
                           className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-blue-400 hover:bg-blue-900/20 transition-colors"
@@ -120,13 +110,14 @@ export function ManageCertifications() {
 
                     {/* Content */}
                     <div className="flex-1">
-                      <h3 className="text-white mb-3 leading-snug line-clamp-2">
+                      <h3 className="text-white mb-3 leading-snug font-medium line-clamp-2">
                         {cert.title}
                       </h3>
                       <p className="text-sm text-slate-400 mb-2">{cert.issuer}</p>
                       <div className="flex items-center gap-2 text-xs text-slate-500">
                         <Calendar className="w-3 h-3" />
-                        <span>{cert.year}</span>
+                        {/* Changed cert.year to cert.date to match context */}
+                        <span>{cert.date}</span>
                       </div>
                     </div>
 

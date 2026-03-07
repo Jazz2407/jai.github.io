@@ -100,9 +100,9 @@ export function EducationSection() {
                       <div className="p-2 rounded-lg bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30">
                         <Award className="w-4 h-4 text-purple-400" />
                       </div>
-                      {cert.url && (
+                      {cert.issuer && (
                         <a
-                          href={cert.url}
+                          href={cert.issuer}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-slate-400 hover:text-blue-400 transition-colors"
@@ -113,7 +113,7 @@ export function EducationSection() {
                     </div>
                     <h4 className="text-white mb-2 leading-snug">{cert.title}</h4>
                     <p className="text-sm text-slate-400 mb-1">{cert.issuer}</p>
-                    <p className="text-xs text-slate-500">{cert.year}</p>
+                    <p className="text-xs text-slate-500">{cert.date}</p>
                   </div>
 
                   <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">

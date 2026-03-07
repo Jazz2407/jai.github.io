@@ -104,7 +104,7 @@ export function ManageExperience() {
                               </div>
                               <div className="flex items-center gap-2 text-slate-500">
                                 <Calendar className="w-4 h-4" />
-                                <span>{exp.duration}</span>
+                                <span>{exp.period}</span>
                               </div>
                             </div>
                           </div>

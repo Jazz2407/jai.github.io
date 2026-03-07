@@ -16,10 +16,12 @@ interface ExperienceModalProps {
 
 export function ExperienceModal({ isOpen, onClose, experience }: ExperienceModalProps) {
   const { addExperience, updateExperience } = usePortfolio();
+  
+  // 1. Standardize state names to match the PortfolioContext interface
   const [formData, setFormData] = useState({
     role: '',
     company: '',
-    duration: '',
+    period: '', // Changed from 'duration' to 'period'
     highlights: [] as string[],
   });
   const [highlightInput, setHighlightInput] = useState('');
@@ -29,43 +31,47 @@ export function ExperienceModal({ isOpen, onClose, experience }: ExperienceModal
       setFormData({
         role: experience.role,
         company: experience.company,
-        duration: experience.duration,
+        period: experience.period, // Correctly mapping period to period
         highlights: experience.highlights,
       });
     } else {
       setFormData({
         role: '',
         company: '',
-        duration: '',
+        period: '',
         highlights: [],
       });
     }
   }, [experience, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 2. Fixed handleSubmit with correct scope references
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.role || !formData.company || !formData.duration) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
+    // Map the internal formData to the submission object
+    const submissionData = {
+      role: formData.role,
+      company: formData.company,
+      period: formData.period, 
+      highlights: formData.highlights
+    };
 
-    if (formData.highlights.length === 0) {
-      toast.error('Please add at least one highlight');
-      return;
+    try {
+      if (experience) {
+        // Now 'await' is correctly inside an 'async' function
+        await updateExperience(experience.id, submissionData);
+        toast.success('Experience updated successfully');
+      } else {
+        await addExperience(submissionData);
+        toast.success('Experience added successfully');
+      }
+      onClose();
+    } catch (error: any) {
+      toast.error(`Error: ${error.message}`);
     }
-
-    if (experience) {
-      updateExperience(experience.id, formData);
-      toast.success('Experience updated successfully');
-    } else {
-      addExperience(formData);
-      toast.success('Experience added successfully');
-    }
-
-    onClose();
   };
 
+  // ... rest of your helper functions (addHighlight, removeHighlight)
   const addHighlight = () => {
     if (highlightInput.trim()) {
       setFormData({
@@ -162,8 +168,8 @@ export function ExperienceModal({ isOpen, onClose, experience }: ExperienceModal
                     <Input
                       id="duration"
                       required
-                      value={formData.duration}
-                      onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                      value={formData.period}
+                      onChange={(e) => setFormData({ ...formData, period: e.target.value })}
                       className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
                       placeholder="e.g., 2022 - Present"
                     />

@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from "../supabaseClient";
 
+// --- Exported Interfaces ---
 export interface Project {
   id: string;
   title: string;
@@ -15,15 +17,15 @@ export interface Project {
 export interface Skill {
   id: string;
   name: string;
-  category: 'Frontend' | 'Backend' | 'AI/ML' | 'Database' | 'Tools';
+  category: string;
   level: number;
 }
 
 export interface Experience {
   id: string;
-  role: string;
   company: string;
-  duration: string;
+  role: string;
+  period: string;
   highlights: string[];
 }
 
@@ -31,8 +33,14 @@ export interface Certification {
   id: string;
   title: string;
   issuer: string;
-  year: string;
-  url?: string;
+  date: string;
+}
+
+// Added Stats interface to match your components' needs
+interface PortfolioStats {
+  emailReduction: string;
+  aiSystems: string;
+  yearsExperience: string;
 }
 
 interface PortfolioData {
@@ -40,271 +48,192 @@ interface PortfolioData {
   skills: Skill[];
   experiences: Experience[];
   certifications: Certification[];
-  stats: {
-    emailReduction: string;
-    aiSystems: string;
-    yearsExperience: string;
-  };
+  stats: PortfolioStats; // Added stats here
 }
 
 interface PortfolioContextType {
   data: PortfolioData;
-  addProject: (project: Omit<Project, 'id'>) => void;
-  updateProject: (id: string, project: Partial<Project>) => void;
-  deleteProject: (id: string) => void;
-  addSkill: (skill: Omit<Skill, 'id'>) => void;
-  updateSkill: (id: string, skill: Partial<Skill>) => void;
-  deleteSkill: (id: string) => void;
-  addExperience: (experience: Omit<Experience, 'id'>) => void;
-  updateExperience: (id: string, experience: Partial<Experience>) => void;
-  deleteExperience: (id: string) => void;
-  addCertification: (cert: Omit<Certification, 'id'>) => void;
-  updateCertification: (id: string, cert: Partial<Certification>) => void;
-  deleteCertification: (id: string) => void;
+  loading: boolean;
+  // Project Actions
+  addProject: (project: Omit<Project, 'id'>) => Promise<void>;
+  updateProject: (id: string, project: Partial<Project>) => Promise<void>;
+  deleteProject: (id: string) => Promise<void>;
+  // Skill Actions
+  addSkill: (skill: Omit<Skill, 'id'>) => Promise<void>;
+  updateSkill: (id: string, skill: Partial<Skill>) => Promise<void>;
+  deleteSkill: (id: string) => Promise<void>;
+  // Experience Actions
+  addExperience: (exp: Omit<Experience, 'id'>) => Promise<void>;
+  updateExperience: (id: string, exp: Partial<Experience>) => Promise<void>;
+  deleteExperience: (id: string) => Promise<void>;
+  // Certification Actions
+  addCertification: (cert: Omit<Certification, 'id'>) => Promise<void>;
+  updateCertification: (id: string, cert: Partial<Certification>) => Promise<void>;
+  deleteCertification: (id: string) => Promise<void>;
 }
 
 const PortfolioContext = createContext<PortfolioContextType | undefined>(undefined);
 
-const initialData: PortfolioData = {
-  projects: [
-    {
-      id: '1',
-      title: 'Smart Inbox Assistant',
-      description: 'Automated email agent using GPT-4 and LangChain to classify and draft responses with a secure approval system.',
-      techStack: ['GPT-4', 'LangChain', 'Python', 'FastAPI'],
-      githubUrl: 'https://github.com/Jazz2407',
-      liveUrl: '',
-      imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&auto=format&fit=crop',
-      featured: true,
-      published: true,
-    },
-    {
-      id: '2',
-      title: 'AgroN AI',
-      description: 'Autonomous rover using YOLO v8, Raspberry Pi, and Arduino for object detection with 95% accuracy in crop monitoring.',
-      techStack: ['YOLO v8', 'Raspberry Pi', 'Arduino', 'IoT', 'Computer Vision'],
-      githubUrl: 'https://github.com/Jazz2407',
-      liveUrl: '',
-      imageUrl: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&auto=format&fit=crop',
-      featured: true,
-      published: true,
-    },
-    {
-      id: '3',
-      title: 'Key Market Initiatives',
-      description: 'Real-time market tracking platform app using Flutter and Supabase with optimized filtering algorithms.',
-      techStack: ['Flutter', 'Supabase', 'Dart'],
-      githubUrl: 'https://github.com/Jazz2407',
-      liveUrl: '',
-      imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop',
-      featured: false,
-      published: true,
-    },
-    {
-      id: '4',
-      title: 'Stock Forecasting Analysis',
-      description: 'Automated forecasting tool using statistical models with scikit-learn and Power BI for real-time market visualization.',
-      techStack: ['Python', 'Scikit-learn', 'Power BI', 'Pandas'],
-      githubUrl: 'https://github.com/Jazz2407',
-      liveUrl: '',
-      imageUrl: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&auto=format&fit=crop',
-      featured: false,
-      published: true,
-    },
-    {
-      id: '5',
-      title: 'Study Focus Tracker',
-      description: 'Behavioral analysis system using OpenCV for tracking user attention with sub-100ms latency.',
-      techStack: ['OpenCV', 'Computer Vision', 'Python', 'TensorFlow'],
-      githubUrl: 'https://github.com/Jazz2407',
-      liveUrl: '',
-      imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop',
-      featured: false,
-      published: true,
-    },
-  ],
-  skills: [
-    { id: '1', name: 'React', category: 'Frontend', level: 90 },
-    { id: '2', name: 'TypeScript', category: 'Frontend', level: 85 },
-    { id: '3', name: 'Tailwind CSS', category: 'Frontend', level: 95 },
-    { id: '4', name: 'Node.js', category: 'Backend', level: 88 },
-    { id: '5', name: 'Express', category: 'Backend', level: 85 },
-    { id: '6', name: 'Python', category: 'Backend', level: 92 },
-    { id: '7', name: 'GPT-4', category: 'AI/ML', level: 90 },
-    { id: '8', name: 'LangChain', category: 'AI/ML', level: 85 },
-    { id: '9', name: 'OpenCV', category: 'AI/ML', level: 80 },
-    { id: '10', name: 'YOLO v8', category: 'AI/ML', level: 82 },
-    { id: '11', name: 'MongoDB', category: 'Database', level: 85 },
-    { id: '12', name: 'Supabase', category: 'Database', level: 88 },
-    { id: '13', name: 'PostgreSQL', category: 'Database', level: 80 },
-    { id: '14', name: 'Git', category: 'Tools', level: 90 },
-    { id: '15', name: 'Docker', category: 'Tools', level: 75 },
-    { id: '16', name: 'Figma', category: 'Tools', level: 85 },
-  ],
-  experiences: [
-    {
-      id: '1',
-      role: 'Executive Software Developer',
-      company: 'Work Prioritized',
-      duration: '2024 - Present',
-      highlights: [
-        'Implemented OpenAI-powered chatbots, automating customer support and enabling instant user responses',
-        'Developed a complete Brain Tumor Detection system from data collection to final product deployment',
-        'Reduced email processing time by 40% through intelligent automation',
-      ],
-    },
-    {
-      id: '2',
-      role: 'Freelance Developer & Video Editor',
-      company: 'Self-Employed',
-      duration: '2022 - 2024',
-      highlights: [
-        'Built and deployed 5+ full-featured web and mobile applications',
-        'Managed end-to-end development from UI design to database architecture',
-        'Collaborated with clients to create optimized social media content, boosting brand engagement',
-      ],
-    },
-  ],
-  certifications: [
-    {
-      id: '1',
-      title: 'Business Intelligence Using PowerBI',
-      issuer: 'Skill Nation',
-      year: '2023',
-    },
-    {
-      id: '2',
-      title: 'The Joy Of Computing Using Python',
-      issuer: 'NPTEL',
-      year: '2024',
-    },
-    {
-      id: '3',
-      title: 'Introduction To Industrial AI And IoT',
-      issuer: 'NPTEL',
-      year: '2024',
-    },
-  ],
-  stats: {
-    emailReduction: '40%',
-    aiSystems: '5+',
-    yearsExperience: '3+',
-  },
-};
-
 export function PortfolioProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<PortfolioData>(() => {
-    const saved = localStorage.getItem('portfolioData');
-    return saved ? JSON.parse(saved) : initialData;
+  const [data, setData] = useState<PortfolioData>({
+    projects: [],
+    skills: [],
+    experiences: [],
+    certifications: [],
+    // Initializing stats with your specified default values
+    stats: { 
+      emailReduction: '40%', 
+      aiSystems: '5+', 
+      yearsExperience: '3+' 
+    }
   });
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    localStorage.setItem('portfolioData', JSON.stringify(data));
-  }, [data]);
+  // --- Mappers ---
+  const mapProjects = (db: any[]): Project[] => db.map(p => ({
+    id: p.id, title: p.title, description: p.description,
+    techStack: p.tech_stack || [], githubUrl: p.github_url || '',
+    liveUrl: p.live_url || '', imageUrl: p.image_url || '',
+    featured: p.featured || false, published: p.published || false,
+  }));
 
-  const addProject = (project: Omit<Project, 'id'>) => {
-    const newProject = { ...project, id: Date.now().toString() };
-    setData((prev) => ({ ...prev, projects: [...prev.projects, newProject] }));
+  const mapSkills = (db: any[]): Skill[] => db.map(s => ({
+    id: s.id, name: s.name, category: s.category, level: s.level || 0
+  }));
+
+  // --- Fetch Logic ---
+  const fetchAllData = async () => {
+    setLoading(true);
+    try {
+      const [p, s, e, c] = await Promise.all([
+        supabase.from('projects').select('*').order('created_at', { ascending: false }),
+        supabase.from('skills').select('*').order('name'),
+        supabase.from('experiences').select('*').order('created_at', { ascending: false }),
+        supabase.from('certifications').select('*').order('date', { ascending: false })
+      ]);
+
+      setData(prev => ({
+        ...prev, // Keeps the stats we initialized in state
+        projects: mapProjects(p.data || []),
+        skills: mapSkills(s.data || []),
+        experiences: e.data || [],
+        certifications: c.data || []
+      }));
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateProject = (id: string, updates: Partial<Project>) => {
-    setData((prev) => ({
-      ...prev,
-      projects: prev.projects.map((p) => (p.id === id ? { ...p, ...updates } : p)),
-    }));
+  useEffect(() => { fetchAllData(); }, []);
+
+  // --- CRUD Implementations ---
+
+  // PROJECTS
+  const addProject = async (project: Omit<Project, 'id'>) => {
+    const { data: newP, error } = await supabase.from('projects').insert([{
+      title: project.title, description: project.description, tech_stack: project.techStack,
+      image_url: project.imageUrl, github_url: project.githubUrl, live_url: project.liveUrl,
+      featured: project.featured, published: project.published
+    }]).select().single();
+    if (error) throw error;
+    setData(prev => ({ ...prev, projects: [mapProjects([newP])[0], ...prev.projects] }));
   };
 
-  const deleteProject = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      projects: prev.projects.filter((p) => p.id !== id),
-    }));
+  const updateProject = async (id: string, updates: Partial<Project>) => {
+    const { error } = await supabase.from('projects').update({
+      title: updates.title, 
+      tech_stack: updates.techStack,
+      description: updates.description,
+      image_url: updates.imageUrl,
+      github_url: updates.githubUrl,
+      live_url: updates.liveUrl,
+      featured: updates.featured,
+      published: updates.published
+    }).eq('id', id);
+    if (error) throw error;
+    fetchAllData(); 
   };
 
-  const addSkill = (skill: Omit<Skill, 'id'>) => {
-    const newSkill = { ...skill, id: Date.now().toString() };
-    setData((prev) => ({ ...prev, skills: [...prev.skills, newSkill] }));
+  const deleteProject = async (id: string) => {
+    const { error } = await supabase.from('projects').delete().eq('id', id);
+    if (error) throw error;
+    setData(prev => ({ ...prev, projects: prev.projects.filter(p => p.id !== id) }));
   };
 
-  const updateSkill = (id: string, updates: Partial<Skill>) => {
-    setData((prev) => ({
-      ...prev,
-      skills: prev.skills.map((s) => (s.id === id ? { ...s, ...updates } : s)),
-    }));
+  // SKILLS
+  const addSkill = async (skill: Omit<Skill, 'id'>) => {
+    const { data: newS, error } = await supabase.from('skills').insert([skill]).select().single();
+    if (error) throw error;
+    setData(prev => ({ ...prev, skills: [...prev.skills, mapSkills([newS])[0]] }));
   };
 
-  const deleteSkill = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      skills: prev.skills.filter((s) => s.id !== id),
-    }));
+  const updateSkill = async (id: string, updates: Partial<Skill>) => {
+    const { error } = await supabase.from('skills').update(updates).eq('id', id);
+    if (error) throw error;
+    fetchAllData();
   };
 
-  const addExperience = (experience: Omit<Experience, 'id'>) => {
-    const newExp = { ...experience, id: Date.now().toString() };
-    setData((prev) => ({ ...prev, experiences: [...prev.experiences, newExp] }));
+  const deleteSkill = async (id: string) => {
+    const { error } = await supabase.from('skills').delete().eq('id', id);
+    if (error) throw error;
+    setData(prev => ({ ...prev, skills: prev.skills.filter(s => s.id !== id) }));
   };
 
-  const updateExperience = (id: string, updates: Partial<Experience>) => {
-    setData((prev) => ({
-      ...prev,
-      experiences: prev.experiences.map((e) => (e.id === id ? { ...e, ...updates } : e)),
-    }));
+  // EXPERIENCE
+  const addExperience = async (exp: Omit<Experience, 'id'>) => {
+    const { data: newE, error } = await supabase.from('experiences').insert([exp]).select().single();
+    if (error) throw error;
+    setData(prev => ({ ...prev, experiences: [newE, ...prev.experiences] }));
   };
 
-  const deleteExperience = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      experiences: prev.experiences.filter((e) => e.id !== id),
-    }));
+  const updateExperience = async (id: string, updates: Partial<Experience>) => {
+    const { error } = await supabase.from('experiences').update(updates).eq('id', id);
+    if (error) throw error;
+    fetchAllData();
   };
 
-  const addCertification = (cert: Omit<Certification, 'id'>) => {
-    const newCert = { ...cert, id: Date.now().toString() };
-    setData((prev) => ({ ...prev, certifications: [...prev.certifications, newCert] }));
+  const deleteExperience = async (id: string) => {
+    const { error } = await supabase.from('experiences').delete().eq('id', id);
+    if (error) throw error;
+    setData(prev => ({ ...prev, experiences: prev.experiences.filter(e => e.id !== id) }));
   };
 
-  const updateCertification = (id: string, updates: Partial<Certification>) => {
-    setData((prev) => ({
-      ...prev,
-      certifications: prev.certifications.map((c) => (c.id === id ? { ...c, ...updates } : c)),
-    }));
+  // CERTIFICATIONS
+  const addCertification = async (cert: Omit<Certification, 'id'>) => {
+    const { data: newC, error } = await supabase.from('certifications').insert([cert]).select().single();
+    if (error) throw error;
+    setData(prev => ({ ...prev, certifications: [newC, ...prev.certifications] }));
   };
 
-  const deleteCertification = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      certifications: prev.certifications.filter((c) => c.id !== id),
-    }));
+  const updateCertification = async (id: string, updates: Partial<Certification>) => {
+    const { error } = await supabase.from('certifications').update(updates).eq('id', id);
+    if (error) throw error;
+    fetchAllData();
+  };
+
+  const deleteCertification = async (id: string) => {
+    const { error } = await supabase.from('certifications').delete().eq('id', id);
+    if (error) throw error;
+    setData(prev => ({ ...prev, certifications: prev.certifications.filter(c => c.id !== id) }));
   };
 
   return (
-    <PortfolioContext.Provider
-      value={{
-        data,
-        addProject,
-        updateProject,
-        deleteProject,
-        addSkill,
-        updateSkill,
-        deleteSkill,
-        addExperience,
-        updateExperience,
-        deleteExperience,
-        addCertification,
-        updateCertification,
-        deleteCertification,
-      }}
-    >
+    <PortfolioContext.Provider value={{ 
+      data, loading, 
+      addProject, updateProject, deleteProject,
+      addSkill, updateSkill, deleteSkill,
+      addExperience, updateExperience, deleteExperience,
+      addCertification, updateCertification, deleteCertification
+    }}>
       {children}
     </PortfolioContext.Provider>
   );
 }
 
-export function usePortfolio() {
+export const usePortfolio = () => {
   const context = useContext(PortfolioContext);
-  if (!context) {
-    throw new Error('usePortfolio must be used within PortfolioProvider');
-  }
+  if (!context) throw new Error('usePortfolio must be used within PortfolioProvider');
   return context;
-}
+};

@@ -6,20 +6,19 @@ import { Button } from '../ui/button';
 import { SkillModal } from './SkillModal';
 import { toast } from 'sonner';
 
-const categoryIcons = {
-  Frontend: Code,
-  Backend: Server,
-  'AI/ML': Brain,
-  Database: Database,
-  Tools: Wrench,
+// Updated keys to match your desired display titles
+const categoryIcons: Record<string, any> = {
+  'AI & Machine Learning (Primary Focus)': Brain,
+  'Backend & Database': Server,
+  'Frontend & Mobile': Code,
+  'Tools & Analytics': Wrench,
 };
 
-const categoryGradients = {
-  Frontend: 'from-blue-500 to-cyan-500',
-  Backend: 'from-green-500 to-emerald-500',
-  'AI/ML': 'from-purple-500 to-pink-500',
-  Database: 'from-orange-500 to-red-500',
-  Tools: 'from-yellow-500 to-orange-500',
+const categoryGradients: Record<string, string> = {
+  'AI & Machine Learning (Primary Focus)': 'from-purple-500 to-pink-500',
+  'Backend & Database': 'from-green-500 to-emerald-500',
+  'Frontend & Mobile': 'from-blue-500 to-cyan-500',
+  'Tools & Analytics': 'from-yellow-500 to-orange-500',
 };
 
 export function ManageSkills() {
@@ -27,11 +26,18 @@ export function ManageSkills() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
 
-  const categories = ['Frontend', 'Backend', 'AI/ML', 'Database', 'Tools'] as const;
+  // Redefined categories to match the requested format
+  const categories = [
+    'AI & Machine Learning (Primary Focus)',
+    'Backend & Database',
+    'Frontend & Mobile',
+    'Tools & Analytics'
+  ] as const;
+
   const skillsByCategory = categories.reduce((acc, category) => {
     acc[category] = data.skills.filter((s) => s.category === category);
     return acc;
-  }, {} as Record<string, typeof data.skills>);
+  }, {} as Record<string, Skill[]>);
 
   const handleEdit = (skill: Skill) => {
     setEditingSkill(skill);
@@ -93,8 +99,8 @@ export function ManageSkills() {
       ) : (
         <div className="space-y-8">
           {categories.map((category, categoryIndex) => {
-            const Icon = categoryIcons[category];
-            const gradient = categoryGradients[category];
+            const Icon = categoryIcons[category] || Code;
+            const gradient = categoryGradients[category] || 'from-slate-500 to-slate-600';
             const skills = skillsByCategory[category] || [];
 
             if (skills.length === 0) return null;
@@ -112,7 +118,7 @@ export function ManageSkills() {
                     <Icon className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl text-white">{category}</h3>
+                    <h3 className="text-xl text-white font-bold">{category}</h3>
                     <p className="text-sm text-slate-500">{skills.length} skills</p>
                   </div>
                 </div>
@@ -135,10 +141,9 @@ export function ManageSkills() {
                           <div className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-5 transition-opacity rounded-xl`} />
 
                           <div className="relative z-10">
-                            {/* Skill Name & Actions */}
                             <div className="flex items-start justify-between mb-4">
                               <div className="flex-1">
-                                <h4 className="text-white mb-1">{skill.name}</h4>
+                                <h4 className="text-white font-medium mb-1">{skill.name}</h4>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-slate-500">Level</span>
                                   <span className="text-sm text-slate-300">{skill.level}%</span>
@@ -160,7 +165,6 @@ export function ManageSkills() {
                               </div>
                             </div>
 
-                            {/* Progress Bar */}
                             <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                               <motion.div
                                 initial={{ width: 0 }}
@@ -170,10 +174,6 @@ export function ManageSkills() {
                                 <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-white/20" />
                               </motion.div>
                             </div>
-                          </div>
-
-                          <div className={`absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none`}>
-                            <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${gradient} opacity-10 blur-xl`} />
                           </div>
                         </div>
                       </motion.div>
@@ -186,7 +186,6 @@ export function ManageSkills() {
         </div>
       )}
 
-      {/* Skill Modal */}
       <SkillModal
         isOpen={isModalOpen}
         onClose={() => {

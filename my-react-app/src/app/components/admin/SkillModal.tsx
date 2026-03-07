@@ -17,9 +17,11 @@ interface SkillModalProps {
 
 export function SkillModal({ isOpen, onClose, skill }: SkillModalProps) {
   const { addSkill, updateSkill } = usePortfolio();
+  
+  // Initial state updated to match the new category naming convention
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Frontend' as Skill['category'],
+    category: 'AI & Machine Learning (Primary Focus)' as Skill['category'],
     level: 50,
   });
 
@@ -33,13 +35,13 @@ export function SkillModal({ isOpen, onClose, skill }: SkillModalProps) {
     } else {
       setFormData({
         name: '',
-        category: 'Frontend',
+        category: 'AI & Machine Learning (Primary Focus)',
         level: 50,
       });
     }
   }, [skill, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name) {
@@ -47,22 +49,24 @@ export function SkillModal({ isOpen, onClose, skill }: SkillModalProps) {
       return;
     }
 
-    if (skill) {
-      updateSkill(skill.id, formData);
-      toast.success('Skill updated successfully');
-    } else {
-      addSkill(formData);
-      toast.success('Skill added successfully');
+    try {
+      if (skill) {
+        await updateSkill(skill.id, formData);
+        toast.success('Skill updated successfully');
+      } else {
+        await addSkill(formData);
+        toast.success('Skill added successfully');
+      }
+      onClose();
+    } catch (error: any) {
+      toast.error(`Error: ${error.message}`);
     }
-
-    onClose();
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -71,19 +75,17 @@ export function SkillModal({ isOpen, onClose, skill }: SkillModalProps) {
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
           />
 
-          {/* Modal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="relative w-full max-w-lg rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 shadow-2xl"
+              className="relative w-full max-w-lg rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 shadow-2xl overflow-hidden"
             >
-              {/* Header */}
-              <div className="bg-slate-900/95 backdrop-blur-xl border-b border-slate-700 px-8 py-6 flex items-center justify-between rounded-t-2xl">
+              <div className="bg-slate-900/95 backdrop-blur-xl border-b border-slate-700 px-8 py-6 flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl text-white">
+                  <h2 className="text-2xl font-semibold text-white">
                     {skill ? 'Edit Skill' : 'Add New Skill'}
                   </h2>
                   <p className="text-sm text-slate-400 mt-1">
@@ -91,6 +93,7 @@ export function SkillModal({ isOpen, onClose, skill }: SkillModalProps) {
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={onClose}
                   className="p-2 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
                 >
@@ -98,9 +101,7 @@ export function SkillModal({ isOpen, onClose, skill }: SkillModalProps) {
                 </button>
               </div>
 
-              {/* Form */}
               <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                {/* Skill Name */}
                 <div>
                   <Label htmlFor="skillName" className="text-slate-300 mb-2 block">
                     Skill Name *
@@ -110,51 +111,55 @@ export function SkillModal({ isOpen, onClose, skill }: SkillModalProps) {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                    className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500 focus:ring-purple-500"
                     placeholder="e.g., React, Python, Docker"
                   />
                 </div>
 
-                {/* Category */}
                 <div>
                   <Label htmlFor="category" className="text-slate-300 mb-2 block">
                     Category *
                   </Label>
                   <Select
                     value={formData.category}
-                   onValueChange={(value: string) =>
-                   setFormData({ ...formData, category: value as Skill['category'] })
-}
+                    onValueChange={(value: string) =>
+                      setFormData({ ...formData, category: value as Skill['category'] })
+                    }
                   >
-                    <SelectTrigger className="bg-slate-900/50 border-slate-700 text-white">
-                      <SelectValue />
+                    <SelectTrigger className="bg-slate-900/50 border-slate-700 text-white focus:ring-purple-500">
+                      <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-slate-700">
-                      <SelectItem value="Frontend">Frontend</SelectItem>
-                      <SelectItem value="Backend">Backend</SelectItem>
-                      <SelectItem value="AI/ML">AI/ML</SelectItem>
-                      <SelectItem value="Database">Database</SelectItem>
-                      <SelectItem value="Tools">Tools</SelectItem>
+                    <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                      <SelectItem value="AI & Machine Learning (Primary Focus)">
+                        AI & Machine Learning (Primary Focus)
+                      </SelectItem>
+                      <SelectItem value="Backend & Database">
+                        Backend & Database
+                      </SelectItem>
+                      <SelectItem value="Frontend & Mobile">
+                        Frontend & Mobile
+                      </SelectItem>
+                      <SelectItem value="Tools & Analytics">
+                        Tools & Analytics
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                {/* Skill Level */}
                 <div>
                   <Label className="text-slate-300 mb-3 block">
-                    Skill Level: <span className="text-blue-400">{formData.level}%</span>
+                    Skill Level: <span className="text-blue-400 font-medium">{formData.level}%</span>
                   </Label>
                   <div className="space-y-4">
                     <Slider
                       value={[formData.level]}
-                      onValueChange={(values: number[]) => setFormData({ ...formData, level: values[0] })
-}
+                      onValueChange={(values: number[]) => setFormData({ ...formData, level: values[0] })}
                       min={0}
                       max={100}
                       step={5}
                       className="w-full"
                     />
-                    <div className="flex justify-between text-xs text-slate-500">
+                    <div className="flex justify-between text-[10px] uppercase tracking-wider text-slate-500 font-medium">
                       <span>Beginner</span>
                       <span>Intermediate</span>
                       <span>Advanced</span>
@@ -163,14 +168,13 @@ export function SkillModal({ isOpen, onClose, skill }: SkillModalProps) {
                   </div>
                 </div>
 
-                {/* Preview */}
                 <div className="p-4 rounded-lg bg-slate-900/30 border border-slate-700/50">
-                  <p className="text-xs text-slate-500 mb-2">Preview</p>
+                  <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-tight">Preview</p>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-slate-300">{formData.name || 'Skill name'}</span>
-                    <span className="text-xs text-slate-500">{formData.level}%</span>
+                    <span className="text-sm text-slate-200 font-medium">{formData.name || 'Skill name'}</span>
+                    <span className="text-xs text-slate-400">{formData.level}%</span>
                   </div>
-                  <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
                       style={{ width: `${formData.level}%` }}
@@ -178,7 +182,6 @@ export function SkillModal({ isOpen, onClose, skill }: SkillModalProps) {
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-4 pt-4 border-t border-slate-700">
                   <Button
                     type="button"
@@ -190,7 +193,7 @@ export function SkillModal({ isOpen, onClose, skill }: SkillModalProps) {
                   </Button>
                   <Button
                     type="submit"
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
                   >
                     {skill ? 'Update Skill' : 'Add Skill'}
                   </Button>

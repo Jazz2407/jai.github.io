@@ -6,6 +6,8 @@ import { ManageProjects } from '../components/admin/ManageProjects';
 import { ManageSkills } from '../components/admin/ManageSkills';
 import { ManageExperience } from '../components/admin/ManageExperience';
 import { ManageCertifications } from '../components/admin/ManageCertifications';
+// If Admin.tsx is in src/app/pages/
+import { supabase } from "../supabaseClient";
 
 export function Admin() {
   const [currentPage, setCurrentPage] = useState('dashboard');
