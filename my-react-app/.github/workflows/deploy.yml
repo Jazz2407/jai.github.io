@@ -1,0 +1,45 @@
+name: Deploy Vite Site
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          # This tells GitHub to look inside your subfolder for the cache
+          cache-dependency-path: './my-react-app/package-lock.json'
+
+      - name: Install and Build
+        # This tells GitHub to run the commands inside your subfolder
+        working-directory: ./my-react-app
+        run: |
+          npm install
+          npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # This points to the build output inside your subfolder
+          path: './my-react-app/dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
