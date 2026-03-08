@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App'; // This works if App.tsx and main.tsx are in the same folder
-import './styles/index.css'; // Adjust if your CSS is in a different folder
+
+ // Adjust if your CSS is in a different folder
+import App from "./app/App";
+import "./app/styles/index.css";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -3,7 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';">
+   <meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self'; 
+               script-src 'self' 'unsafe-inline' 'unsafe-eval';
+               connect-src 'self' https://sxznwrjvuusvvwrldczi.supabase.co wss://sxznwrjvuusvvwrldczi.supabase.co; 
+               img-src 'self' data: https://sxznwrjvuusvvwrldczi.supabase.co; 
+               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+               font-src 'self' https://fonts.gstatic.com;">
     <title>my-react-app</title>
   </head>
   <body>
